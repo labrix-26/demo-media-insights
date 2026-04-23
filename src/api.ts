@@ -32,6 +32,7 @@ export interface EmotionSummary {
 export interface UploadResponse {
   upload_url: string;
   video_key: string;
+  content_type: string;
   expires_in: number;
 }
 
@@ -55,11 +56,11 @@ export async function getEmotions(jobId: string): Promise<EmotionSummary> {
   return res.json();
 }
 
-export async function requestUploadUrl(filename: string): Promise<UploadResponse> {
+export async function requestUploadUrl(filename: string, contentType: string): Promise<UploadResponse> {
   const res = await fetch(`${API_URL}/uploads`, {
     method: 'POST',
     headers: { ...headers, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ filename }),
+    body: JSON.stringify({ filename, content_type: contentType }),
   });
   if (!res.ok) throw new Error(`Failed to get upload URL: ${res.status}`);
   return res.json();
@@ -68,12 +69,13 @@ export async function requestUploadUrl(filename: string): Promise<UploadResponse
 export async function uploadFile(
   file: File,
   uploadUrl: string,
+  contentType: string,
   onProgress?: (pct: number) => void,
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open('PUT', uploadUrl);
-    xhr.setRequestHeader('Content-Type', file.type || 'video/mp4');
+    xhr.setRequestHeader('Content-Type', contentType);
     xhr.upload.addEventListener('progress', (e) => {
       if (e.lengthComputable && onProgress) {
         onProgress(Math.round((e.loaded / e.total) * 100));

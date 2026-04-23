@@ -15,7 +15,8 @@ export function AnalysisList({ onSelect }: Props) {
     try {
       setLoading(true);
       const data = await listAnalyses(50, lastKey);
-      setJobs((prev) => (lastKey ? [...prev, ...data.items] : data.items));
+      const sorted = [...data.items].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      setJobs((prev) => (lastKey ? [...prev, ...sorted] : sorted));
       setNextKey(data.next_key);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load');
@@ -56,7 +57,12 @@ export function AnalysisList({ onSelect }: Props) {
   return (
     <div className="view-container">
       <div className="view-header">
-        <h2>Analysis Results</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2>Analysis Results</h2>
+          <button className="btn btn-secondary" onClick={() => load()} disabled={loading}>
+            {loading ? 'Refreshing...' : 'Refresh'}
+          </button>
+        </div>
         <p className="view-desc">View all video emotion analysis jobs and their results.</p>
       </div>
 

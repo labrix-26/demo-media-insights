@@ -41,9 +41,9 @@ export function UploadView({ onUploadComplete }: Props) {
     setError(null);
     try {
       setPhase('signing');
-      const { upload_url } = await requestUploadUrl(file.name);
+      const { upload_url, content_type } = await requestUploadUrl(file.name, file.type || 'video/mp4');
       setPhase('uploading');
-      await uploadFile(file, upload_url, setProgress);
+      await uploadFile(file, upload_url, content_type, setProgress);
       setPhase('done');
       setTimeout(onUploadComplete, 1500);
     } catch (err) {
